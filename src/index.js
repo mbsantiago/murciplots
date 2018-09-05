@@ -5,7 +5,7 @@ import './index.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 
-var anp = 'El Triunfo';
+var anp = 'Tehuacán';
 
 ReactDOM.render(
   <Plots anp={anp}/>,

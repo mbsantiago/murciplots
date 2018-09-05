@@ -11,7 +11,9 @@ const diet_labels = [
   'nectarivore',
   'frugivore',
   'carnivore',
-  'piscivore'
+  'piscivore',
+  'sanguinivore',
+  'omnivore'
 ];
 
 

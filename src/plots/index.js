@@ -1,13 +1,10 @@
 import React, { Component } from 'react';
 import { Button, ButtonGroup } from 'reactstrap';
-import ReactLoading from 'react-loading';
+import { BounceLoader } from 'react-spinners';
 import request from 'request';
 import './index.css';
 
-import IntensidadPlot from './intensity';
-import SpeciesListPlot from './species_list';
-import HorasPlot from './hour_activity';
-import CambioPlot from './change';
+import SpeciesListPlot from './composition_plot';
 
 
 class Plots extends Component {
@@ -84,20 +81,21 @@ class Plots extends Component {
   }
 
   render() {
-    let content;
-
     if (this.state.loaded) {
-      content = this.getGraph();
+      if ("Error" in this.state.data) {
+        return "No hay datos de Audio para esta ANP";
+      } else {
+        let content = this.getGraph();
+        return (
+          <div>
+          {this.getTypeButtons()}
+          {content}
+          </div>
+        );
+      }
     } else {
-      content = <ReactLoading type={'spin'} color={'green'} height={'10%'} width={'10%'} />;
+      return <BounceLoader color='#72a052' />;
     }
-
-    return (
-      <div>
-        {this.getTypeButtons()}
-        {content}
-      </div>
-    );
   }
 }
 
