@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
-import { Button, ButtonGroup } from 'reactstrap';
 import { BounceLoader } from 'react-spinners';
 import request from 'request';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 
 import CompositionPlot from './composition_plot';
 
 
-class Plots extends Component {
+class AudioPlots extends Component {
 
   constructor(props) {
     super(props);
@@ -28,20 +28,20 @@ class Plots extends Component {
     ];
 
     const buttons = types.map(
-      (x) => (
-        <Button
-          onClick={() => this.handleTypeClick(x)}
-          key={x}
+      (type) => (
+        <div
+          className={type === this.state.type? 'btn btn-primary': 'btn btn-secondary'}
+          onClick={() => this.handleTypeClick(type)}
         >
-        {x}
-        </Button>
+        {type}
+        </div>
       )
     );
 
     return (
-      <ButtonGroup>
+      <div className='btn-group'>
         {buttons}
-      </ButtonGroup>
+      </div>
     );
   }
 
@@ -59,7 +59,7 @@ class Plots extends Component {
     var type = this.state.type;
 
     if (type === 'composicion') {
-      return <SpeciesListPlot data={this.state.data}/>;
+      return <CompositionPlot data={this.state.data}/>;
     } else if (type === 'lista especies') {
       return "lista especies";
     } else if (type === 'actividad diaria' ) {
@@ -99,4 +99,4 @@ class Plots extends Component {
   }
 }
 
-export default Plots;
+export default AudioPlots;
