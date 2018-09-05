@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Button, ButtonGroup, Container, Row } from 'reactstrap';
 import ReactLoading from 'react-loading';
 import request from 'request';
 import './index.css';
@@ -21,6 +22,38 @@ class Plots extends Component {
     };
   }
 
+  getTypeButtons() {
+    const types = [
+      'composicion',
+      'lista especies',
+      'actividad diaria',
+      'agregado anual'
+    ];
+
+    const buttons = types.map(
+      (x) => (
+        <Button
+          onClick={() => this.handleTypeClick(x)}
+          key={x}
+        >
+        {x}
+        </Button>
+      )
+    );
+
+    return (
+      <ButtonGroup>
+        {buttons}
+      </ButtonGroup>
+    );
+  }
+
+  handleTypeClick(type) {
+    this.setState({
+      type: type
+    });
+  }
+
   componentDidMount() {
     console.log('Did mount');
     this.loadData();
@@ -30,13 +63,13 @@ class Plots extends Component {
     var type = this.state.type;
 
     if (type === 'composicion') {
-      return "composición";
+      //return <SpeciesListPlot data={this.state.data}/>;
     } else if (type === 'lista especies') {
       return "lista especies";
     } else if (type === 'actividad diaria' ) {
       return "actividad diaria";
-    } else if (type === 'anual') {
-      return "anual";
+    } else if (type === 'agregado anual') {
+      return "agregado anual";
     }
   }
 
@@ -52,11 +85,20 @@ class Plots extends Component {
   }
 
   render() {
+    let content;
+
     if (this.state.loaded) {
-      return this.getGraph();
+      content = this.getGraph();
     } else {
-      return <ReactLoading type={'spin'} color={'green'} height={'10%'} width={'10%'} />;
+      content = <ReactLoading type={'spin'} color={'green'} height={'10%'} width={'10%'} />;
     }
+
+    return (
+      <div>
+        {this.getTypeButtons()}
+        {content}
+      </div>
+    )
   }
 }
 
