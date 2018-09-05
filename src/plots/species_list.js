@@ -6,41 +6,29 @@ import './species_list.css';
 import * as d3sankey from 'd3-sankey';
 
 
+const diet_labels = [
+  'insectivore',
+  'nectarivore',
+  'frugivore',
+  'carnivore',
+  'piscivore'
+];
 
-const num_familias = 5;
-const num_generos = 12;
-const num_species = 50;
-
-
-let genus_indices = [];
-for (var i = 0; i < num_generos; i++){
-  genus_indices.push(Math.floor(num_familias * Math.random()));
-}
-
-let taxonomy = {};
-for (var j = 0; j < num_species; j++){
-  let genus_index = Math.floor(num_generos * Math.random());
-  let family_index = genus_indices[genus_index];
-
-  taxonomy['Murci' + j] = {
-    family: 'Familia' + family_index,
-    genus: 'Genero' + genus_index
-  };
-}
 
 class SpeciesListPlot extends Component {
 
   constructor(props){
     super(props);
-    this.data = props.data;
+    this.data = props.data.comp_graph;
+    this.years = Object.keys(this.data);
 
     this.createPlot = this.createPlot.bind(this);
     this.height = 600;
     this.width = 946;
 
     this.state = {
-      year: props.data.years[0],
-      type: "pulse"
+      year: this.years[0],
+      type: 'taxa'
     };
   }
 
@@ -52,109 +40,81 @@ class SpeciesListPlot extends Component {
     this.createPlot();
   }
 
-  sumArrays(arr) {
-    let sum = 0;
+  preprocessData(data) {
+    let typeFunc;
 
-    for (var i = 0; i < arr.length; i++) {
-      for (var j = 0; j < arr[i].length; j++) {
-        sum += arr[i][j];
-      }
+    if (this.state.type === 'taxa') {
+      typeFunc = d => diet_labels.indexOf(d.target) < 0;
+    } else {
+      typeFunc = d => diet_labels.indexOf(d.target) >= 0;
     }
 
-    return sum;
-  }
+    console.log(data.edges.filter(d => d.source === d.target));
 
-  getData(year, type) {
-    let species_name = this.data.species.names;
-    let calls = this.data.species[type][year];
+    let significant = data.edges
+      .filter(d => d.intensity > 0)
+      .filter(d => d.source !== d.target)
+      .filter(typeFunc);
 
-    let links = [];
     let nodes = [];
+    let links = [];
 
-    let genus_averages = {};
-    let genus2family = {};
-    let indices = {};
-
+    let indexMap = {};
     let index = 0;
 
-    const arrSum = arr => arr.reduce((a,b) => a + b, 0);
+    for (var i = 0; i < significant.length; i++) {
+      let obj_target = significant[i]['target'];
+      let obj_source = significant[i]['source'];
 
-    for (var i = 0; i < species_name.length; i++) {
-      let specie = species_name[i];
-      nodes.push({name: specie});
-      indices[specie] = index;
-      index++;
-
-      let genus = taxonomy[specie].genus;
-      if (!(genus in indices)) {
-        nodes.push({name: genus});
-        indices[genus] = index;
+      if (!(obj_source in indexMap)) {
+        nodes.push({name: obj_source});
+        indexMap[obj_source] = index;
         index++;
       }
 
-      let family = taxonomy[specie].family;
-      if (!(family in indices)){
-        nodes.push({name: family});
-        indices[family] = index;
+      if (!(obj_target in indexMap)) {
+        nodes.push({name: obj_target});
+        indexMap[obj_target] = index;
         index++;
       }
 
-      genus2family[genus] = family;
+      let source_index = indexMap[obj_source];
+      let target_index = indexMap[obj_target];
+      let obj_value = significant[i].intensity;
 
-      let total_calls = this.sumArrays(calls[specie]);
-      if (genus in genus_averages) {
-        genus_averages[genus].push(total_calls);
-      } else {
-        genus_averages[genus] = [total_calls];
-      }
+      let new_link = {
+        source: source_index,
+        target: target_index,
+        value: obj_value
+      };
 
-      links.push({
-        source: indices[specie],
-        target: indices[genus],
-        value: total_calls
-      });
+      links.push(new_link);
     }
 
-    for (var genus in genus_averages) {
-      let sum_intensity = arrSum(genus_averages[genus]);
-      let family = genus2family[genus];
-
-      links.push({
-        source: indices[genus],
-        target: indices[family],
-        value: sum_intensity
-      });
-    }
-
-    let link_data = {
-      nodes: nodes,
-      links: links
-    };
-
-    return link_data;
+    return {
+      nodes: nodes.map(d => Object.assign({}, d)),
+      links: links.map(d => Object.assign({}, d))};
   }
 
   createPlot() {
     const svg = d3.select(this.node);
     svg.selectAll("*").remove();
 
-    const data = this.getData(this.state.year, this.state.type);
     const height = this.height;
     const width = this.width;
+
+    const data = this.preprocessData(this.data[this.state.year]);
 
     const { nodes, links } = d3sankey.sankey()
         .nodeWidth(15)
         .nodePadding(10)
-        .extent([[1, 1], [width - 1, height - 5]])({
-          nodes: data.nodes.map(d => Object.assign({}, d)),
-          links: data.links.map(d => Object.assign({}, d))
-        });
+        .extent([[1, 1], [width - 1, height - 5]])(data);
 
     const color = d3.scaleOrdinal(d3.schemeSet3);
 
     function format(d) {
-      const f = d3.format(",.0f");
-      return `${f(d)} TWh`;
+      const f = d3.format(",.1f");
+      return `${f(d)} pasos/día`;
     }
 
     svg.append("g")
@@ -197,9 +157,6 @@ class SpeciesListPlot extends Component {
         .attr("stroke", d => 'url(' + window.location.href + '#' + d.uid + ')')
         .attr("stroke-width", d => Math.max(1, d.width));
 
-    link.append("title")
-        .text(d => `${d.source.name} → ${d.target.name}\n${format(d.value)}`);
-
     svg.append("g")
         .style("font", "10px sans-serif")
       .selectAll("text")
@@ -216,43 +173,45 @@ class SpeciesListPlot extends Component {
     this.setState({year: year});
   }
 
-  selectPass() {
-    this.setState({type: "pass"});
+  handleTypeClick(type) {
+    this.setState({type: type});
   }
 
-  selectPulse() {
-    this.setState({type: "pulse"});
-  }
-
-  render() {
-    const year_buttons = this.data.years.map(
+  getButtons() {
+    const year_buttons = this.years.map(
       (year) => (
-          <Button
-            onClick={() => this.handleYearClick(year)}
-            key={year}
-          >
-            {year}
-          </Button>));
+        <Button
+        onClick={() => this.handleYearClick(year)}
+        key={year}
+        >
+        {year}
+        </Button>));
 
-    return (
-      <Container>
+    const type_buttons = ['taxa', 'diet'].map(
+      (type) =>(
+        <Button
+        onClick={() => this.handleTypeClick(type)}
+        key={type}
+        >
+        {type}
+        </Button>));
+
+      return (
         <Row>
           <ButtonGroup>
             {year_buttons}
           </ButtonGroup>
           <ButtonGroup>
-            <Button
-              onClick={() => this.selectPulse()}
-            >
-              {"Pulsos"}
-            </Button>
-            <Button
-            onClick={() => this.selectPass()}
-            >
-            {"Pasos"}
-            </Button>
+            {type_buttons}
           </ButtonGroup>
-        </Row>
+        </Row>);
+  }
+
+  render() {
+
+    return (
+      <Container>
+        {this.getButtons()}
         <Row>
           <svg
             ref={node => this.node = node}

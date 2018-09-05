@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, ButtonGroup, Container, Row } from 'reactstrap';
+import { Button, ButtonGroup } from 'reactstrap';
 import ReactLoading from 'react-loading';
 import request from 'request';
 import './index.css';
@@ -55,7 +55,6 @@ class Plots extends Component {
   }
 
   componentDidMount() {
-    console.log('Did mount');
     this.loadData();
   }
 
@@ -63,7 +62,7 @@ class Plots extends Component {
     var type = this.state.type;
 
     if (type === 'composicion') {
-      //return <SpeciesListPlot data={this.state.data}/>;
+      return <SpeciesListPlot data={this.state.data}/>;
     } else if (type === 'lista especies') {
       return "lista especies";
     } else if (type === 'actividad diaria' ) {
@@ -78,7 +77,7 @@ class Plots extends Component {
 
     request(url, (err, res, body) => {
       this.setState({
-        data: body,
+        data: JSON.parse(body),
         loaded: true
       });
     });
@@ -98,7 +97,7 @@ class Plots extends Component {
         {this.getTypeButtons()}
         {content}
       </div>
-    )
+    );
   }
 }
 
