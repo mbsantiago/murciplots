@@ -4,7 +4,7 @@ import { BounceLoader } from 'react-spinners';
 import request from 'request';
 import './index.css';
 
-import SpeciesListPlot from './composition_plot';
+import CompositionPlot from './composition_plot';
 
 
 class Plots extends Component {

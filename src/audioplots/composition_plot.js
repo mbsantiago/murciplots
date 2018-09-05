@@ -17,7 +17,7 @@ const diet_labels = [
 ];
 
 
-class SpeciesListPlot extends Component {
+class CompositionPlot extends Component {
 
   constructor(props){
     super(props);
