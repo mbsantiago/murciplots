@@ -4,7 +4,7 @@ import AudioPlots from './audioplots';
 import './index.css';
 
 
-var anp = 'Tehuacán-Cuicatlán';
+var anp = 'El Triunfo';
 
 ReactDOM.render(
   <AudioPlots anp={anp}/>,

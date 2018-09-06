@@ -52,8 +52,6 @@ class CompositionPlot extends Component {
       typeFunc = d => diet_labels.indexOf(d.target) >= 0;
     }
 
-    console.log(data.edges.filter(d => d.source === d.target));
-
     let significant = data.edges
       .filter(d => d.intensity > 0)
       .filter(d => d.source !== d.target)
@@ -186,6 +184,7 @@ class CompositionPlot extends Component {
         <div
           className={year === this.state.year ? 'btn btn-primary': 'btn btn-secondary'}
           onClick={() => this.handleYearClick(year)}
+          key={year}
         >
           {year}
         </div>));
@@ -193,8 +192,9 @@ class CompositionPlot extends Component {
     const type_buttons = ['taxa', 'diet'].map(
       (type) =>(
         <div
-          class={type === this.state.type ? 'btn btn-primary': 'btn btn-secondary'}
+          className={type === this.state.type ? 'btn btn-primary': 'btn btn-secondary'}
           onClick={() => this.handleTypeClick(type)}
+          key={type}
         >
           {type}
         </div>));
@@ -213,7 +213,7 @@ class CompositionPlot extends Component {
   render() {
 
     return (
-      <div class='plot'>
+      <div className='plot'>
         {this.getButtons()}
         <div ref={this.myRef}>
           <svg

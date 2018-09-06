@@ -5,6 +5,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 
 import CompositionPlot from './composition_plot';
+import SpeciesList from './species_list';
 
 
 class AudioPlots extends Component {
@@ -32,8 +33,9 @@ class AudioPlots extends Component {
         <div
           className={type === this.state.type? 'btn btn-primary': 'btn btn-secondary'}
           onClick={() => this.handleTypeClick(type)}
+          key={type}
         >
-        {type}
+          {type}
         </div>
       )
     );
@@ -61,7 +63,7 @@ class AudioPlots extends Component {
     if (type === 'composicion') {
       return <CompositionPlot data={this.state.data}/>;
     } else if (type === 'lista especies') {
-      return "lista especies";
+      return <SpeciesList data={this.state.data}/>;
     } else if (type === 'actividad diaria' ) {
       return "actividad diaria";
     } else if (type === 'agregado anual') {
