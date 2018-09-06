@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import './species_list.css';
 
 
 class SpeciesList extends Component {
